@@ -1,0 +1,79 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+#define TRIG1 2
+#define ECHO1 3
+#define TRIG2 4
+#define ECHO2 5
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const float D = 0.5;
+bool measurementComplete = false;
+
+void setup() {
+    pinMode(TRIG1, OUTPUT);
+    pinMode(ECHO1, INPUT);
+    pinMode(TRIG2, OUTPUT);
+    pinMode(ECHO2, INPUT);
+    
+    lcd.init();
+    lcd.backlight();
+    lcd.setCursor(0, 0);
+    lcd.print("Speed: ");
+    lcd.setCursor(0, 1);
+    lcd.print("Ready...");
+    
+    Serial.begin(9600);
+}
+
+float getDistance(int trigPin, int echoPin) {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(1);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(trigPin, LOW);
+    
+    long duration = pulseIn(echoPin, HIGH, 10000);
+    
+    if (duration == 0) return 100;
+    return duration * 0.034 / 2;
+}
+
+void loop() {
+    if (!measurementComplete) {
+        float d1 = getDistance(TRIG1, ECHO1);
+        float d2 = getDistance(TRIG2, ECHO2);
+        
+        static unsigned long startTime = 0;
+        static bool personDetected = false;
+
+        if (d1 < 50 && !personDetected) {
+            startTime = millis();
+            personDetected = true;
+            lcd.setCursor(0, 1);
+            lcd.print("Measuring...");
+        }
+
+        if (d2 < 50 && personDetected) {
+            unsigned long endTime = millis();
+            float timeTaken = (endTime - startTime) / 1000.0;
+            
+            if (timeTaken > 0.01) {
+                float speed = (D / timeTaken) * 3.6;
+
+                if (speed > 0.1 && speed < 80.0) {
+                    lcd.setCursor(7, 0);
+                    lcd.print(speed, 1);
+                    lcd.print(" km/h   ");
+                    
+                    lcd.setCursor(0, 1);
+                    lcd.print("Reset to measure");
+                    
+                    measurementComplete = true;
+                }
+            }
+        }
+    }
+    
+    delay(10);
+}
