@@ -33,7 +33,3 @@ https://github.com/user-attachments/assets/e669238a-3cd6-4bbb-89c5-006e7943b316
 ## 🔌 Wiring Diagram  
 ![Screenshot 2025-02-19 184438](https://github.com/user-attachments/assets/72e48e2d-3357-4c2b-be34-a84f22662940)
 
-## 🚀 Installation & Usage  
-1. **Connect the components** as per the wiring diagram.  
-2. **Upload the `radar_code.ino`** file to your Arduino.  
-3. **Power on the system**, and it will be ready to measure speeds. 
